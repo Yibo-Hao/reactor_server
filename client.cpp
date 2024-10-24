@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         std::cout << "socket() failed." << std::endl;
         return -1;
     }
-    
+
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(PORT);
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     {
         // 从命令行输入内容。
         memset(buf, 0, sizeof(buf));
-        std::cout << "please input:";
+        std::cout << "please input: ";
         std::cin >> buf;
 
         if (send(socket_fd, buf, strlen(buf),0) <= 0)       // 把命令行输入的内容发送给服务端。
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
             close(socket_fd);
             return -1;
         }
-        
+
         memset(buf, 0, sizeof(buf));
         if (recv(socket_fd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
         {

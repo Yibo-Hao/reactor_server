@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
-#include <sys/socket.h>
 
 void set_nonblocking(int);
 
@@ -23,25 +22,26 @@ int main() {
 
     int opt = 1;
     setsockopt(listened_fd, SOL_SOCKET, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof opt));
-    setsockopt(listened_fd, SOL_SOCKET, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof opt));
+    setsockopt(listened_fd, IPPROTO_TCP, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof opt));
     setsockopt(listened_fd, SOL_SOCKET, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof opt));
     setsockopt(listened_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof opt));
 
     set_nonblocking(listened_fd);
 
     struct sockaddr_in server_addr{};
+    memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
 
-    if (bind(listened_fd, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0 )
+    if (bind(listened_fd, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0)
     {
         std::cerr << "bind() failed" << std::endl;
         close(listened_fd);
         return -1;
     }
 
-    if (listen(listened_fd,128) != 0 )
+    if (listen(listened_fd, 128) != 0)
     {
         std::cerr << "listen() failed" << std::endl;
         close(listened_fd);
@@ -101,6 +101,7 @@ int main() {
                         ssize_t n_read = recv(evs[i].data.fd, buffer, sizeof(buffer), 0);
                         if (n_read > 0)
                         {
+                            std::cout << "recv: " << buffer << std::endl;
                             send(evs[i].data.fd, "OK", 2, 0);
                         }
                         else if (n_read == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。

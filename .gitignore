@@ -34,3 +34,5 @@
 .idea/**
 
 cmake-build-debug-docker/**
+
+cmake-build-debug-remote-host/**
