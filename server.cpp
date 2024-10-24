@@ -1,12 +1,12 @@
 #include <iostream>
-#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <arpa/inet.h>
 #include <cstring>
+
+#include "inet_address.h"
 
 int PORT = 7175;
 
@@ -24,13 +24,9 @@ int main() {
     setsockopt(listened_fd, SOL_SOCKET, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof opt));
     setsockopt(listened_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof opt));
 
-    struct sockaddr_in server_addr{};
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    class InetAddress server_addr(INADDR_ANY, PORT);
 
-    if (bind(listened_fd, reinterpret_cast<struct sockaddr *>(&server_addr), sizeof(server_addr)) < 0)
+    if (bind(listened_fd, server_addr.addr(), sizeof(server_addr)) < 0)
     {
         std::cerr << "bind() failed" << std::endl;
         close(listened_fd);
@@ -82,7 +78,8 @@ int main() {
                     struct sockaddr_in client_addr{};
                     socklen_t len = sizeof(client_addr);
                     int client_fd = accept4(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len, SOCK_NONBLOCK);
-                    std::cout << "New client connected: " << client_fd << inet_ntoa(client_addr.sin_addr) << ntohs(client_addr.sin_port) << std::endl;
+                    InetAddress client_inet_addr(client_addr);
+                    std::cout << "New client connected: " << client_fd << client_inet_addr.ip() << client_inet_addr.port() << std::endl;
                     struct epoll_event client_ev{};
                     client_ev.events = EPOLLIN | EPOLLET;
                     client_ev.data.fd = client_fd;
