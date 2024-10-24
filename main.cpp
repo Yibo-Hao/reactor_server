@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <cstring>
+#include <sys/socket.h>
 
 void set_nonblocking(int);
 
@@ -70,18 +72,56 @@ int main() {
         }
 
         for (int i = 0; i < in_fds; i++) {
-            if (evs[i].data.fd == listened_fd) {
+            if (evs[i].data.fd == listened_fd)
+            {
                 struct sockaddr_in client_addr{};
                 socklen_t len = sizeof(client_addr);
                 int client_fd = accept(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len);
                 set_nonblocking(client_fd);
-
                 std::cout << "New client connected: " << client_fd << inet_ntoa(client_addr.sin_addr) << ntohs(client_addr.sin_port) << std::endl;
-
                 struct epoll_event client_ev{};
                 client_ev.events = EPOLLIN;
                 client_ev.data.fd = client_fd;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev);
+            } else
+            {
+                if (evs[i].events & EPOLLRDHUP)
+                {
+                    close(evs[i].data.fd);
+                    std::cout << "Client disconnected: " << evs[i].data.fd << std::endl;
+                }
+                else if (evs[i].events & (EPOLLIN|EPOLLPRI))
+                {
+                    char buffer[1024];
+                    while (true)
+                    {
+                        memset(&buffer, 0, sizeof(buffer));
+                        ssize_t n_read = recv(evs[i].data.fd, buffer, sizeof(buffer), 0);
+                        if (n_read > 0)
+                        {
+                            send(evs[i].data.fd, "OK", 2, 0);
+                        }
+                        else if (n_read == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。
+                        {
+                            continue;
+                        }
+                        else if (n_read == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
+                        {
+                            break;
+                        }
+                        else if (n_read == 0)
+                        {
+                            std::cout << "Client disconnected: " << evs[i].data.fd << std::endl;
+                            close(evs[i].data.fd);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    std::cout << "Client error: " << evs[i].data.fd << std::endl;
+                    close(evs[i].data.fd);
+                }
             }
         }
     }
