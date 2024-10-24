@@ -8,12 +8,10 @@
 #include <arpa/inet.h>
 #include <cstring>
 
-void set_nonblocking(int);
-
 int PORT = 7175;
 
 int main() {
-    int listened_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int listened_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (listened_fd < 0)
     {
         std::cerr << "socket() failed" << std::endl;
@@ -25,8 +23,6 @@ int main() {
     setsockopt(listened_fd, IPPROTO_TCP, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof opt));
     setsockopt(listened_fd, SOL_SOCKET, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof opt));
     setsockopt(listened_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof opt));
-
-    set_nonblocking(listened_fd);
 
     struct sockaddr_in server_addr{};
     memset(&server_addr, 0, sizeof(server_addr));
@@ -74,26 +70,25 @@ int main() {
         }
 
         for (int i = 0; i < in_fds; i++) {
-            if (evs[i].data.fd == listened_fd)
+            if (evs[i].events & EPOLLRDHUP)
             {
-                struct sockaddr_in client_addr{};
-                socklen_t len = sizeof(client_addr);
-                int client_fd = accept(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len);
-                set_nonblocking(client_fd);
-                std::cout << "New client connected: " << client_fd << inet_ntoa(client_addr.sin_addr) << ntohs(client_addr.sin_port) << std::endl;
-                struct epoll_event client_ev{};
-                client_ev.events = EPOLLIN;
-                client_ev.data.fd = client_fd;
-                epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev);
-            } else
+                close(evs[i].data.fd);
+                std::cout << "Client disconnected: " << evs[i].data.fd << std::endl;
+            }
+            else if (evs[i].events & (EPOLLIN|EPOLLPRI))
             {
-                if (evs[i].events & EPOLLRDHUP)
+                if (evs[i].data.fd == listened_fd)
                 {
-                    close(evs[i].data.fd);
-                    std::cout << "Client disconnected: " << evs[i].data.fd << std::endl;
+                    struct sockaddr_in client_addr{};
+                    socklen_t len = sizeof(client_addr);
+                    int client_fd = accept4(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len, SOCK_NONBLOCK);
+                    std::cout << "New client connected: " << client_fd << inet_ntoa(client_addr.sin_addr) << ntohs(client_addr.sin_port) << std::endl;
+                    struct epoll_event client_ev{};
+                    client_ev.events = EPOLLIN | EPOLLET;
+                    client_ev.data.fd = client_fd;
+                    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev);
                 }
-                else if (evs[i].events & (EPOLLIN|EPOLLPRI))
-                {
+                else {
                     char buffer[1024];
                     while (true)
                     {
@@ -120,20 +115,14 @@ int main() {
                         }
                     }
                 }
-                else
-                {
-                    std::cout << "Client error: " << evs[i].data.fd << std::endl;
-                    close(evs[i].data.fd);
-                }
+            }
+            else
+            {
+                std::cout << "Client error: " << evs[i].data.fd << std::endl;
+                close(evs[i].data.fd);
             }
         }
     }
 
     return 0;
-}
-
-// 设置非阻塞的IO。
-void set_nonblocking(int fd)
-{
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
 }
