@@ -1,9 +1,11 @@
 #include <iostream>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 void set_nonblocking(int);
 
@@ -42,6 +44,46 @@ int main() {
         std::cerr << "listen() failed" << std::endl;
         close(listened_fd);
         return -1;
+    }
+
+    int epoll_fd = epoll_create(1);
+    struct epoll_event ev{};
+    ev.events = EPOLLIN;
+    ev.data.fd = listened_fd;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, listened_fd, &ev);
+    epoll_event evs[10];
+
+    while(true)
+    {
+        int in_fds = epoll_wait(epoll_fd, evs, 10, -1);
+
+        if (in_fds < 0)
+        {
+            std::cerr << "epoll_wait() failed" << std::endl;
+            break;
+        }
+
+        if (in_fds == 0)
+        {
+            std::cout << "epoll_wait() timeout." << std::endl;
+            continue;
+        }
+
+        for (int i = 0; i < in_fds; i++) {
+            if (evs[i].data.fd == listened_fd) {
+                struct sockaddr_in client_addr{};
+                socklen_t len = sizeof(client_addr);
+                int client_fd = accept(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len);
+                set_nonblocking(client_fd);
+
+                std::cout << "New client connected: " << client_fd << inet_ntoa(client_addr.sin_addr) << ntohs(client_addr.sin_port) << std::endl;
+
+                struct epoll_event client_ev{};
+                client_ev.events = EPOLLIN;
+                client_ev.data.fd = client_fd;
+                epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &client_ev);
+            }
+        }
     }
 
     return 0;
