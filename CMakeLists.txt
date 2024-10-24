@@ -8,4 +8,5 @@ add_executable(client src/client.cpp)
 
 add_subdirectory(lib/inet_address)
 add_subdirectory(lib/socket)
-target_link_libraries(server inet_address socket)
+add_subdirectory(lib/epoll)
+target_link_libraries(server inet_address socket epoll)
