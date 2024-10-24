@@ -1,10 +1,10 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/epoll.h>
-#include <netinet/tcp.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <memory>
 
 #include "inet_address.h"
 #include "socket.h"
@@ -12,16 +12,16 @@
 int PORT = 7175;
 
 int main() {
-    Socket server_socket{create_nonblocking()};
-    int listened_fd = server_socket.fd();
-    server_socket.set_reuse_addr(true);
-    server_socket.set_reuse_port(true);
-    server_socket.set_tcp_no_delay(true);
-    server_socket.set_keepalive(true);
+    std::unique_ptr<Socket> server_socket = std::make_unique<Socket>(create_nonblocking());
+    std::unique_ptr<InetAddress> server_addr = std::make_unique<InetAddress>(INADDR_ANY, PORT);
 
-    InetAddress server_addr(INADDR_ANY, PORT);
-    server_socket.bind(server_addr);
-    server_socket.listen(128);
+    int listened_fd = server_socket->fd();
+    server_socket->set_reuse_addr(true);
+    server_socket->set_reuse_port(true);
+    server_socket->set_tcp_no_delay(true);
+    server_socket->set_keepalive(true);
+    server_socket->bind(*server_addr);
+    server_socket->listen(128);
     std::cout << "Server started." << std::endl;
 
     int epoll_fd = epoll_create(1);
@@ -58,7 +58,7 @@ int main() {
                 if (evs[i].data.fd == listened_fd)
                 {
                     InetAddress client_addr{};
-                    int client_fd = server_socket.accept(client_addr);
+                    int client_fd = server_socket->accept(client_addr);
                     std::cout << "New client connected: " << client_fd << client_addr.ip() << client_addr.port() << std::endl;
                     struct epoll_event client_ev{};
                     client_ev.events = EPOLLIN | EPOLLET;
