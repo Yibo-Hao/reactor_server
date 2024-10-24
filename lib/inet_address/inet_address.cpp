@@ -14,7 +14,7 @@ InetAddress::InetAddress(unsigned int ip, uint16_t port)
     addr_.sin_port = htons(port);
 }
 
-InetAddress::InetAddress(const sockaddr_in addr): addr_(addr)
+InetAddress::InetAddress(sockaddr_in addr): addr_(addr)
 {
 
 }
@@ -32,4 +32,9 @@ uint16_t InetAddress::port() const
 const sockaddr *InetAddress::addr() const
 {
     return (sockaddr*)(&addr_);
+}
+
+void InetAddress::set_addr(sockaddr_in client_addr)
+{
+    addr_ = client_addr;
 }

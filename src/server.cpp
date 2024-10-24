@@ -7,39 +7,21 @@
 #include <cstring>
 
 #include "inet_address.h"
+#include "socket.h"
 
 int PORT = 7175;
 
 int main() {
-    int listened_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-    if (listened_fd < 0)
-    {
-        std::cerr << "socket() failed" << std::endl;
-        return -1;
-    }
+    Socket server_socket{create_nonblocking()};
+    int listened_fd = server_socket.fd();
+    server_socket.set_reuse_addr(true);
+    server_socket.set_reuse_port(true);
+    server_socket.set_tcp_no_delay(true);
+    server_socket.set_keepalive(true);
 
-    int opt = 1;
-    setsockopt(listened_fd, SOL_SOCKET, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof opt));
-    setsockopt(listened_fd, IPPROTO_TCP, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof opt));
-    setsockopt(listened_fd, SOL_SOCKET, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof opt));
-    setsockopt(listened_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof opt));
-
-    class InetAddress server_addr(INADDR_ANY, PORT);
-
-    if (bind(listened_fd, server_addr.addr(), sizeof(server_addr)) < 0)
-    {
-        std::cerr << "bind() failed" << std::endl;
-        close(listened_fd);
-        return -1;
-    }
-
-    if (listen(listened_fd, 128) != 0)
-    {
-        std::cerr << "listen() failed" << std::endl;
-        close(listened_fd);
-        return -1;
-    }
-
+    InetAddress server_addr(INADDR_ANY, PORT);
+    server_socket.bind(server_addr);
+    server_socket.listen(128);
     std::cout << "Server started." << std::endl;
 
     int epoll_fd = epoll_create(1);
@@ -75,11 +57,9 @@ int main() {
             {
                 if (evs[i].data.fd == listened_fd)
                 {
-                    struct sockaddr_in client_addr{};
-                    socklen_t len = sizeof(client_addr);
-                    int client_fd = accept4(listened_fd, reinterpret_cast<struct sockaddr*>(&client_addr), &len, SOCK_NONBLOCK);
-                    InetAddress client_inet_addr(client_addr);
-                    std::cout << "New client connected: " << client_fd << client_inet_addr.ip() << client_inet_addr.port() << std::endl;
+                    InetAddress client_addr{};
+                    int client_fd = server_socket.accept(client_addr);
+                    std::cout << "New client connected: " << client_fd << client_addr.ip() << client_addr.port() << std::endl;
                     struct epoll_event client_ev{};
                     client_ev.events = EPOLLIN | EPOLLET;
                     client_ev.data.fd = client_fd;
