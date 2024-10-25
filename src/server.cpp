@@ -46,9 +46,9 @@ int main() {
                     InetAddress client_addr{};
                     int client_fd = server_socket->accept(client_addr);
                     std::cout << "New client connected: " << client_fd << client_addr.ip() << client_addr.port() << std::endl;
-                    Channel client_channel(&epoll, client_fd);
-                    client_channel.enablereading();
-                    client_channel.useet();
+                    Channel *client_channel = new Channel(&epoll, client_fd);
+                    client_channel->enablereading();
+                    client_channel->useet();
                 }
                 else {
                     char buffer[1024];
