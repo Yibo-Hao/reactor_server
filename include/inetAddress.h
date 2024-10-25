@@ -1,5 +1,5 @@
-#ifndef REACTOR_INET_ADDRESS_H
-#define REACTOR_INET_ADDRESS_H
+#ifndef REACTOR_INETADDRESS_H
+#define REACTOR_INETADDRESS_H
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -22,4 +22,4 @@ public:
     void set_addr(sockaddr_in client_addr);
 };
 
-#endif //REACTOR_INET_ADDRESS_H
+#endif //REACTOR_INETADDRESS_H

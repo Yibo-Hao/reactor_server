@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
@@ -6,7 +8,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "inet_address.h"
+#include "inetAddress.h"
 
 // 创建一个非阻塞的socket。
 int create_nonblocking();

@@ -11,6 +11,11 @@
 #include <sys/epoll.h>
 #include <vector>
 #include <unistd.h>
+#include <memory>
+
+#include "channel.h"
+
+class Channel;
 
 class Epoll
 {
@@ -22,8 +27,9 @@ public:
     Epoll();
     ~Epoll();
 
-    void add_fd(int fd, uint32_t op) const;
-    std::vector<epoll_event> loop(int timeout = -1);
+    void update_channel(Channel*) const;
+    std::vector<Channel *> loop(int timeout = -1);
+
 };
 
 #endif
