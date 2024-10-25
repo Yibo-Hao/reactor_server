@@ -21,8 +21,9 @@ private:
     bool inepoll_ = false; // 是否已经添加到 epoll 树中
     uint32_t events_ = 0;
     uint32_t revents_ = 0;
+    bool is_listen_ = false;
 public:
-    Channel(Epoll *ep, int fd);
+    Channel(Epoll *ep, int fd, bool is_listen = false);
     ~Channel();
 
     int fd() const;
@@ -33,6 +34,8 @@ public:
     bool inpoll() const;
     uint32_t events() const;
     uint32_t revents() const;
+
+    void handle_event(std::shared_ptr<Socket>& server_socket);
 };
 
 

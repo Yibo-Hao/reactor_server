@@ -49,7 +49,6 @@ std::vector<Channel *> Epoll::loop(int timeout)
         exit(-1);
     }
 
-
     if (infds == 0)
     {
         std::cout << "epoll_wait() timeout." << __FILE__ << __FUNCTION__ << __LINE__ << std::endl;
