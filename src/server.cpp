@@ -25,14 +25,15 @@ int main() {
 
     // epoll
     Epoll epoll;
-    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(&epoll, listened_fd, true);
+    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(&epoll, listened_fd);
     server_channel->enablereading();
+    server_channel->set_read_callback(std::bind(&Channel::new_connection, server_channel, server_socket));
 
     while(true)
     {
         std::vector<Channel*> channels = epoll.loop();
-        std::for_each(channels.begin(), channels.end(), [&server_socket](Channel* channel) {
-            channel->handle_event(server_socket);
+        std::for_each(channels.begin(), channels.end(), [](Channel* channel) {
+            channel->handle_event();
         });
     }
 
