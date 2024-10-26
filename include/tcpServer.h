@@ -14,6 +14,7 @@
 #include "eventLoop.h"
 #include "inetAddress.h"
 #include "acceptor.h"
+#include "connection.h"
 
 class TcpServer {
 private:
@@ -24,6 +25,7 @@ public:
     ~TcpServer();
 
     void start();
+    void new_connection(Socket *client_socket);
 };
 
 #endif //REACTOR_TCPSERVER_H

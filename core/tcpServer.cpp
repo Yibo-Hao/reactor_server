@@ -6,6 +6,7 @@
 TcpServer::TcpServer(const std::string &ip, const uint16_t &port) {
     loop_ = new EventLoop;
     acceptor_ = new Acceptor(loop_, ip, port);
+    acceptor_->set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
 }
 
 TcpServer::~TcpServer() {
@@ -15,4 +16,8 @@ TcpServer::~TcpServer() {
 
 void TcpServer::start() {
     loop_->run();
+}
+
+void TcpServer::new_connection(Socket *client_socket) {
+    Connection *connection = new Connection(loop_, client_socket);
 }

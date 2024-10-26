@@ -3,7 +3,8 @@
 //
 #include "acceptor.h"
 
-Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port) : loop_(loop) {
+Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port) : loop_(loop)
+{
     server_socket_ = new Socket(create_nonblocking());
     InetAddress server_addr(ip, port);
     server_socket_->set_reuse_addr(true);
@@ -19,7 +20,8 @@ Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port)
     accept_channel_->enablereading();
 }
 
-Acceptor::~Acceptor() {
+Acceptor::~Acceptor()
+{
     delete server_socket_;
     delete accept_channel_;
 }
@@ -29,5 +31,11 @@ void Acceptor::new_connection()
     InetAddress client_addr{};
     Socket *client_socket = new Socket(server_socket_->accept(client_addr));
     std::cout << "New client connected: " << client_socket->fd() << client_addr.ip() << client_addr.port() << std::endl;
-    Connection *connection = new Connection(loop_, client_socket);
+
+    new_connection_callback_(client_socket);
+}
+
+void Acceptor::set_new_connection_callback(const std::function<void(Socket *)> &cb)
+{
+    new_connection_callback_ = cb;
 }
