@@ -14,3 +14,15 @@ Connection::~Connection() {
     delete client_channel_;
     delete client_socket_;
 }
+
+int Connection::fd() const {
+    return client_socket_->fd();
+}
+
+std::string Connection::ip() const {
+    return client_socket_->ip();
+}
+
+uint16_t Connection::port() const {
+    return client_socket_->port();
+}

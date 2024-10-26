@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <iostream>
 #include <unistd.h>
+#include <string>
 
 #include "inetAddress.h"
 
@@ -17,11 +18,15 @@ class Socket
 {
 private:
     const int fd_;
+    std::string ip_;
+    uint16_t port_;
 public:
     explicit Socket(int fd);
     ~Socket();
 
     int fd() const;
+    std::string ip() const;
+    uint16_t port() const;
     void set_reuse_addr(bool on);
     void set_reuse_port(bool on);
     void set_tcp_no_delay(bool on);

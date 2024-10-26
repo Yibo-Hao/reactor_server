@@ -9,6 +9,7 @@
 #include <functional>
 #include <iostream>
 #include <netinet/in.h>
+#include <map>
 
 #include "channel.h"
 #include "eventLoop.h"
@@ -20,6 +21,7 @@ class TcpServer {
 private:
     EventLoop *loop_;
     Acceptor *acceptor_;
+    std::map <int, Connection *> connections_;
 public:
     TcpServer(const std::string &ip, const uint16_t &port);
     ~TcpServer();

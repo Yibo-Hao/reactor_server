@@ -23,6 +23,10 @@ private:
 public:
     Connection(EventLoop *loop, Socket* client_socket);
     ~Connection();
+
+    int fd() const;
+    std::string ip() const;
+    uint16_t port() const;
 };
 
 #endif //REACTOR_CONNECTION_H

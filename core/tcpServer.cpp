@@ -12,6 +12,10 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t &port) {
 TcpServer::~TcpServer() {
     delete loop_;
     delete acceptor_;
+
+    for (auto &connection : connections_) {
+        delete connection.second;
+    }
 }
 
 void TcpServer::start() {
@@ -20,4 +24,6 @@ void TcpServer::start() {
 
 void TcpServer::new_connection(Socket *client_socket) {
     Connection *connection = new Connection(loop_, client_socket);
+    std::cout << "New client connected: " << connection->fd() << connection->ip() << connection->port() << std::endl;
+    connections_[connection->fd()] = connection;
 }

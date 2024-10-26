@@ -30,8 +30,6 @@ void Acceptor::new_connection()
 {
     InetAddress client_addr{};
     Socket *client_socket = new Socket(server_socket_->accept(client_addr));
-    std::cout << "New client connected: " << client_socket->fd() << client_addr.ip() << client_addr.port() << std::endl;
-
     new_connection_callback_(client_socket);
 }
 
