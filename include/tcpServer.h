@@ -13,10 +13,12 @@
 #include "channel.h"
 #include "eventLoop.h"
 #include "inetAddress.h"
+#include "acceptor.h"
 
 class TcpServer {
 private:
     EventLoop *loop_;
+    Acceptor *acceptor_;
 public:
     TcpServer(const std::string &ip, const uint16_t &port);
     ~TcpServer();

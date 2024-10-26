@@ -13,6 +13,7 @@ add_executable(server
 		${PROJECT_SOURCE_DIR}/core/tcpServer.cpp
 		${PROJECT_SOURCE_DIR}/core/inetAddress.cpp
 		${PROJECT_SOURCE_DIR}/core/socket.cpp
+		${PROJECT_SOURCE_DIR}/core/acceptor.cpp
 )
 
 target_include_directories(server PRIVATE include)
