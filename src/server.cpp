@@ -14,7 +14,6 @@ int main() {
     // socket
     std::shared_ptr<Socket> server_socket = std::make_shared<Socket>(create_nonblocking());
     InetAddress server_addr(INADDR_ANY, PORT);
-    int listened_fd = server_socket->fd();
     server_socket->set_reuse_addr(true);
     server_socket->set_reuse_port(true);
     server_socket->set_tcp_no_delay(true);
@@ -25,7 +24,7 @@ int main() {
 
     // epoll
     EventLoop loop;
-    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(loop.ep(), listened_fd);
+    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(loop.ep(), server_socket->fd());
     server_channel->enablereading();
     server_channel->set_read_callback(std::bind(&Channel::new_connection, server_channel, server_socket));
     loop.run();
