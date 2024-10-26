@@ -8,6 +8,9 @@
 #include "epoll.h"
 #include "channel.h"
 
+class Epoll;
+class Channel;
+
 class EventLoop {
 private:
     Epoll *ep_;
@@ -17,6 +20,7 @@ public:
 
     void run();
     Epoll *ep() const;
+    void update_channel(Channel *ch);
 };
 
 #endif //REACTOR_EVENTLOOP_H

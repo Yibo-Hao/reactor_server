@@ -5,11 +5,10 @@
 
 #include <utility>
 
-Channel::Channel(Epoll *ep, int fd) : ep_(ep), fd_(fd)
+Channel::Channel(EventLoop *loop, int fd) : loop_(loop), fd_(fd)
 {
 }
 
-// 在析构函数中，不要销毁ep_，也不能关闭fd_，这两个东西不属于Channel类，Channel类只是使用它们。
 Channel::~Channel() = default;
 
 int Channel::fd() const
@@ -25,7 +24,7 @@ void Channel::useet()
 void Channel::enablereading()
 {
     events_ = events_ | EPOLLIN;
-    ep_->update_channel(this);
+    loop_->update_channel(this);
 }
 
 void Channel::setinepoll()
@@ -74,12 +73,9 @@ void Channel::handle_event()
 void Channel::new_connection(Socket *server_socket)
 {
     InetAddress client_addr{};
-    int client_fd = server_socket->accept(client_addr);
-    std::cout << "New client connected: " << client_fd << client_addr.ip() << client_addr.port() << std::endl;
-    Channel *client_channel = new Channel(ep_, client_fd);
-    client_channel->set_read_callback(std::bind(&Channel::on_message, client_channel));
-    client_channel->enablereading();
-    client_channel->useet();
+    Socket *client_socket = new Socket(server_socket->accept(client_addr));
+    std::cout << "New client connected: " << client_socket->fd() << client_addr.ip() << client_addr.port() << std::endl;
+    Connection *connection = new Connection(loop_, client_socket);
 }
 
 void Channel::on_message()

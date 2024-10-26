@@ -12,19 +12,21 @@
 #include "inetAddress.h"
 #include "socket.h"
 #include "epoll.h"
+#include "connection.h"
+#include "eventLoop.h"
 
-class Epoll;
+class EventLoop;
 
 class Channel {
 private:
     int fd_ = -1; // Channel 拥有的 fd，一对一
-    Epoll *ep_ = nullptr; // Channel 对应的红黑树，多对一
+    EventLoop *loop_ = nullptr;
     bool inepoll_ = false; // 是否已经添加到 epoll 树中
     uint32_t events_ = 0;
     uint32_t revents_ = 0;
     std::function<void()> read_callback_;
 public:
-    Channel(Epoll *ep, int fd);
+    Channel(EventLoop *loop, int fd);
     ~Channel();
 
     int fd() const;

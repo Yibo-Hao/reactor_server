@@ -14,6 +14,7 @@ add_executable(server
 		${PROJECT_SOURCE_DIR}/core/inetAddress.cpp
 		${PROJECT_SOURCE_DIR}/core/socket.cpp
 		${PROJECT_SOURCE_DIR}/core/acceptor.cpp
+		${PROJECT_SOURCE_DIR}/core/connection.cpp
 )
 
 target_include_directories(server PRIVATE include)
