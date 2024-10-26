@@ -36,7 +36,7 @@ public:
     uint32_t events() const;
     uint32_t revents() const;
     void handle_event();
-    void new_connection(std::shared_ptr<Socket>& server_socket);
+    void new_connection(Socket *server_socket);
     void on_message();
     void set_read_callback(std::function<void()> fn);
 };

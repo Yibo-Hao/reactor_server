@@ -71,7 +71,7 @@ void Channel::handle_event()
     }
 }
 
-void Channel::new_connection(std::shared_ptr<Socket>& server_socket)
+void Channel::new_connection(Socket *server_socket)
 {
     InetAddress client_addr{};
     int client_fd = server_socket->accept(client_addr);

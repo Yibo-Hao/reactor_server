@@ -11,5 +11,6 @@ add_executable(server src/server.cpp
 		lib/socket.cpp
 		lib/inetAddress.cpp
 		lib/eventLoop.cpp
+		lib/tcpServer.cpp
 )
 target_include_directories(server PRIVATE include)
