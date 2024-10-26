@@ -70,14 +70,6 @@ void Channel::handle_event()
     }
 }
 
-void Channel::new_connection(Socket *server_socket)
-{
-    InetAddress client_addr{};
-    Socket *client_socket = new Socket(server_socket->accept(client_addr));
-    std::cout << "New client connected: " << client_socket->fd() << client_addr.ip() << client_addr.port() << std::endl;
-    Connection *connection = new Connection(loop_, client_socket);
-}
-
 void Channel::on_message()
 {
     char buffer[1024];

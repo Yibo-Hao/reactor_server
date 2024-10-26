@@ -15,11 +15,19 @@ Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port)
     std::cout << "Server started." << std::endl;
 
     accept_channel_ = new Channel(loop_, server_socket_->fd());
-    accept_channel_->set_read_callback(std::bind(&Channel::new_connection, accept_channel_, server_socket_));
+    accept_channel_->set_read_callback(std::bind(&Acceptor::new_connection, this));
     accept_channel_->enablereading();
 }
 
 Acceptor::~Acceptor() {
     delete server_socket_;
     delete accept_channel_;
+}
+
+void Acceptor::new_connection()
+{
+    InetAddress client_addr{};
+    Socket *client_socket = new Socket(server_socket_->accept(client_addr));
+    std::cout << "New client connected: " << client_socket->fd() << client_addr.ip() << client_addr.port() << std::endl;
+    Connection *connection = new Connection(loop_, client_socket);
 }

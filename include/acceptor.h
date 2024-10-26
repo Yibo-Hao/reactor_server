@@ -11,6 +11,7 @@
 #include "socket.h"
 #include "channel.h"
 #include "functional"
+#include "connection.h"
 
 class Acceptor {
 private:
@@ -20,6 +21,8 @@ private:
 public:
     Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port);
     ~Acceptor();
+
+    void new_connection();
 };
 
 #endif //REACTOR_ACCEPTOR_H
