@@ -14,7 +14,6 @@ Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port)
     server_socket_->listen(128);
     std::cout << "Server started." << std::endl;
 
-    // epoll
     accept_channel_ = new Channel(loop_, server_socket_->fd());
     accept_channel_->set_read_callback(std::bind(&Channel::new_connection, accept_channel_, server_socket_));
     accept_channel_->enablereading();

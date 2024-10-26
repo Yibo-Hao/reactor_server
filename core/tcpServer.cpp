@@ -3,7 +3,8 @@
 //
 #include "tcpServer.h"
 
-TcpServer::TcpServer(const std::string &ip, const uint16_t &port) : loop_(new EventLoop){
+TcpServer::TcpServer(const std::string &ip, const uint16_t &port) {
+    loop_ = new EventLoop;
     acceptor_ = new Acceptor(loop_, ip, port);
 }
 
