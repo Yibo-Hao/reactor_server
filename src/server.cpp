@@ -1,12 +1,12 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <memory>
-#include <algorithm>
 
 #include "inetAddress.h"
 #include "socket.h"
 #include "epoll.h"
 #include "channel.h"
+#include "eventLoop.h"
 
 int PORT = 7175;
 
@@ -24,18 +24,10 @@ int main() {
     std::cout << "Server started." << std::endl;
 
     // epoll
-    Epoll epoll;
-    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(&epoll, listened_fd);
+    EventLoop loop;
+    std::shared_ptr<Channel> server_channel = std::make_shared<Channel>(loop.ep(), listened_fd);
     server_channel->enablereading();
     server_channel->set_read_callback(std::bind(&Channel::new_connection, server_channel, server_socket));
-
-    while(true)
-    {
-        std::vector<Channel*> channels = epoll.loop();
-        std::for_each(channels.begin(), channels.end(), [](Channel* channel) {
-            channel->handle_event();
-        });
-    }
-
+    loop.run();
     return 0;
 }

@@ -113,5 +113,5 @@ void Channel::on_message()
 
 void Channel::set_read_callback(std::function<void()> fn)
 {
-    read_callback_ =  std::move(fn);
+    read_callback_ = std::move(fn);
 }
