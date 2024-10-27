@@ -20,6 +20,8 @@ private:
     EventLoop *loop_;
     Socket *client_socket_;
     Channel *client_channel_;
+    std::function<void(Connection*)> close_callback_;
+    std::function<void(Connection*)> error_callback_;
 public:
     Connection(EventLoop *loop, Socket* client_socket);
     ~Connection();
@@ -27,6 +29,12 @@ public:
     int fd() const;
     std::string ip() const;
     uint16_t port() const;
+
+    void close_callback();
+    void error_callback();
+
+    void set_close_callback(const std::function<void(Connection*)> &cb);
+    void set_error_callback(const std::function<void(Connection*)> &cb);
 };
 
 #endif //REACTOR_CONNECTION_H

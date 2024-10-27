@@ -56,8 +56,7 @@ void Channel::handle_event()
 {
     if (revents_ & EPOLLRDHUP)
     {
-        std::cout << "Client disconnected: " << fd_ << std::endl;
-        close(fd_);
+        close_callback_();
     }
     else if (revents_ & (EPOLLIN | EPOLLPRI))
     {
@@ -65,8 +64,7 @@ void Channel::handle_event()
     }
     else
     {
-        std::cout << "Client error: " << fd_ << std::endl;
-        close(fd_);
+        error_callback_();
     }
 }
 
@@ -102,4 +100,14 @@ void Channel::on_message()
 void Channel::set_read_callback(std::function<void()> fn)
 {
     read_callback_ = std::move(fn);
+}
+
+void Channel::set_close_callback(std::function<void()> fn)
+{
+    close_callback_ = std::move(fn);
+}
+
+void Channel::set_error_callback(std::function<void()> fn)
+{
+    error_callback_ = std::move(fn);
 }
