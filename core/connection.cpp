@@ -90,14 +90,12 @@ void Connection::on_message()
                 }
                 std::string message(input_buffer_.data() + 4, len);
                 input_buffer_.erase(0, len + 4);
-                std::cout << "recv: " << message << std::endl;
                 message_callback_(this, message);
             }
             break;
         }
         else if (n_read == 0)
         {
-            std::cout << "Client disconnected: " << fd() << std::endl;
             close_callback();
             break;
         }

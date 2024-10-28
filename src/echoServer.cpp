@@ -21,21 +21,22 @@ void EchoServer::start()
 
 void EchoServer::handle_new_connection(Connection *connection)
 {
-
+    std::cout << "New connection." << std::endl;
 }
 
 void EchoServer::handle_close_connection(Connection* connection)
 {
-
+    std::cout << "Connection closed." << std::endl;
 }
 
 void EchoServer::handle_error_connection(Connection* connection)
 {
-
+    std::cout << "Connection error." << std::endl;
 }
 
 void EchoServer::handle_message_connection(Connection* connection, std::string message)
 {
+    std::cout << "recv: " << message << std::endl;
     message = "reply:" + message;
     size_t len = message.size();
     std::string tmpBuf((char*)&len,4);
@@ -45,10 +46,10 @@ void EchoServer::handle_message_connection(Connection* connection, std::string m
 
 void EchoServer::handle_message_complete(Connection* connection)
 {
-
+    std::cout << "Message send complete." << std::endl;
 }
 
 void EchoServer::handle_epoll_timeout(EventLoop *loop)
 {
-
+    std::cout << "Epoll timeout." << std::endl;
 }
