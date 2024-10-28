@@ -19,7 +19,7 @@ void EventLoop::run()
 {
     while(true)
     {
-        std::vector<Channel*> channels = ep_->loop(1000 );
+        std::vector<Channel*> channels = ep_->loop(10*1000);
         if (channels.empty()) {
             epoll_timeout_callback_(this);
         }
