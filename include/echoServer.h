@@ -18,7 +18,7 @@ public:
     void handle_new_connection(Connection *connection);
     void handle_close_connection(Connection* connection);
     void handle_error_connection(Connection* connection);
-    void handle_message_connection(Connection* connection, std::string message);
+    void handle_message_connection(Connection* connection, std::string &message);
     void handle_message_complete(Connection* connection);
     void handle_epoll_timeout(EventLoop *loop);
 };

@@ -34,7 +34,7 @@ void EchoServer::handle_error_connection(Connection* connection)
     std::cout << "Connection error." << std::endl;
 }
 
-void EchoServer::handle_message_connection(Connection* connection, std::string message)
+void EchoServer::handle_message_connection(Connection* connection, std::string &message)
 {
     std::cout << "recv: " << message << std::endl;
     message = "reply:" + message;

@@ -47,7 +47,7 @@ void TcpServer::error_connection(Connection* connection) {
     delete connection;
 }
 
-void TcpServer::message_connection(Connection* connection, std::string message) {
+void TcpServer::message_connection(Connection* connection, std::string &message) {
     if (onmessagecb_) onmessagecb_(connection, message);
 }
 
@@ -74,7 +74,7 @@ void TcpServer::seterrorconnectioncb(std::function<void(Connection*)> fn)
     errorconnectioncb_ = std::move(fn);
 }
 
-void TcpServer::setonmessagecb(std::function<void(Connection*,std::string &message)> fn)
+void TcpServer::setonmessagecb(std::function<void(Connection*, std::string &message)> fn)
 {
     onmessagecb_ = std::move(fn);
 }

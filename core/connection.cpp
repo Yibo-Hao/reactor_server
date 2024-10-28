@@ -55,7 +55,7 @@ void Connection::set_error_callback(const std::function<void(Connection *)> &cb)
     error_callback_ = cb;
 }
 
-void Connection::set_message_callback(const std::function<void(Connection *, std::string)> &cb)
+void Connection::set_message_callback(const std::function<void(Connection *, std::string&)> &cb)
 {
     message_callback_ = cb;
 }
