@@ -26,6 +26,7 @@ void TcpServer::new_connection(Socket *client_socket) {
     Connection *connection = new Connection(loop_, client_socket);
     connection->set_close_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_error_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
+    connection->set_message_callback(std::bind(&TcpServer::message_connection, this, std::placeholders::_1, std::placeholders::_2));
     std::cout << "New client connected: fd:" << connection->fd() << " IP:" << connection->ip() << ":" << connection->port() << std::endl;
     connections_[connection->fd()] = connection;
 }
@@ -40,4 +41,12 @@ void TcpServer::error_connection(Connection* connection) {
     std::cout << "Client error: " << connection->fd() << std::endl;
     connections_.erase(connection->fd());
     delete connection;
+}
+
+void TcpServer::message_connection(Connection* connection, std::string message) {
+    message = "reply:" + message;
+    int len = message.size();
+    std::string tempBuf((char*)(&len), 4);
+    tempBuf += message;
+    send(connection->fd(), tempBuf.data(), tempBuf.size() , 0);
 }

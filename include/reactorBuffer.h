@@ -17,6 +17,7 @@ public:
     void append(const char *data, size_t len);
     size_t size();
     const char *data();
+    void erase(size_t pos, size_t len);
     void clear();
 };
 

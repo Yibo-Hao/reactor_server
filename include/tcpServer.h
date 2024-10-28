@@ -30,6 +30,7 @@ public:
     void new_connection(Socket *client_socket);
     void close_connection(Connection* connection);
     void error_connection(Connection* connection);
+    void message_connection(Connection* connection, std::string message);
 };
 
 #endif //REACTOR_TCPSERVER_H

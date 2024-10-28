@@ -34,14 +34,18 @@ int main(int argc, char *argv[])
     std::cout << "connect ok." << std::endl;
 
     char buf[1024];
+    char tempBuf[1024];
     for (int i = 0; i < 200000; i++)
     {
         // 从命令行输入内容。
         memset(buf, 0, sizeof(buf));
         std::cout << "please input: ";
         std::cin >> buf;
+        int len = strlen(buf);
+        memcpy(tempBuf, &len, 4);
+        memcpy(tempBuf + 4, buf, len);
 
-        if (send(socket_fd, buf, strlen(buf),0) <= 0)       // 把命令行输入的内容发送给服务端。
+        if (send(socket_fd, tempBuf, len + 4,0) <= 0)       // 把命令行输入的内容发送给服务端。
         {
             std::cout << "write() failed." << std::endl;
             close(socket_fd);
@@ -55,7 +59,10 @@ int main(int argc, char *argv[])
             close(socket_fd);
             return -1;
         }
+        int recvLen;
+        memcpy(&recvLen, buf, 4);
+        std::string message(buf + 4, recvLen);
 
-        std::cout << "recv:" << buf << std::endl;
+        std::cout << "recv:" << message << std::endl;
     }
 }

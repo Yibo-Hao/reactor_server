@@ -25,3 +25,7 @@ const char *Buffer::data() {
 void Buffer::clear() {
     buf_.clear();
 }
+
+void Buffer::erase(size_t pos, size_t len) {
+    buf_.erase(pos, len);
+}

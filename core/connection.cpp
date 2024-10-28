@@ -45,6 +45,10 @@ void Connection::set_error_callback(const std::function<void(Connection *)> &cb)
     error_callback_ = cb;
 }
 
+void Connection::set_message_callback(const std::function<void(Connection *, std::string)> &cb) {
+    message_callback_ = cb;
+}
+
 void Connection::on_message() {
     char buffer[1024];
     while (true)
@@ -61,10 +65,17 @@ void Connection::on_message() {
         }
         else if (n_read == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
         {
-            std::cout << "recv: " << input_buffer_.data() << std::endl;
-            output_buffer_ = input_buffer_;
-            input_buffer_.clear();
-            send(fd(), output_buffer_.data(), output_buffer_.size() , 0);
+            while (true) {
+                int len;
+                memcpy(&len, input_buffer_.data(), 4);
+                if (input_buffer_.size() < len + 4) {
+                    break;
+                }
+                std::string message(input_buffer_.data() + 4, len);
+                input_buffer_.erase(0, len + 4);
+                std::cout << "recv: " << message << std::endl;
+                message_callback_(this, message);
+            }
             break;
         }
         else if (n_read == 0)
