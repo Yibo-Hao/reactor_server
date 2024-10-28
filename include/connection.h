@@ -36,8 +36,10 @@ public:
     uint16_t port() const;
 
     void on_message();
+    void send(const char* message, size_t len);
     void close_callback();
     void error_callback();
+    void write_callback();
 
     void set_close_callback(const std::function<void(Connection*)> &cb);
     void set_error_callback(const std::function<void(Connection*)> &cb);

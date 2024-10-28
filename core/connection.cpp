@@ -3,53 +3,65 @@
 //
 #include "connection.h"
 
-Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket) {
+Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket)
+{
     client_channel_ = new Channel(loop_, client_socket_->fd());
     client_channel_->set_read_callback(std::bind(&Connection::on_message, this));
     client_channel_->set_error_callback(std::bind(&Connection::close_callback, this));
     client_channel_->set_close_callback(std::bind(&Connection::error_callback, this));
+    client_channel_->set_write_callback(std::bind(&Connection::write_callback, this));
     client_channel_->enablereading();
     client_channel_->useet();
 }
 
-Connection::~Connection() {
+Connection::~Connection()
+{
     delete client_channel_;
     delete client_socket_;
 }
 
-int Connection::fd() const {
+int Connection::fd() const
+{
     return client_socket_->fd();
 }
 
-std::string Connection::ip() const {
+std::string Connection::ip() const
+{
     return client_socket_->ip();
 }
 
-uint16_t Connection::port() const {
+uint16_t Connection::port() const
+{
     return client_socket_->port();
 }
 
-void Connection::close_callback() {
+void Connection::close_callback()
+{
     close_callback_(this);
 }
 
-void Connection::error_callback() {
+void Connection::error_callback()
+{
     error_callback_(this);
 }
 
-void Connection::set_close_callback(const std::function<void(Connection *)> &cb) {
+void Connection::set_close_callback(const std::function<void(Connection *)> &cb)
+{
     close_callback_ = cb;
 }
 
-void Connection::set_error_callback(const std::function<void(Connection *)> &cb) {
+void Connection::set_error_callback(const std::function<void(Connection *)> &cb)
+{
     error_callback_ = cb;
 }
 
-void Connection::set_message_callback(const std::function<void(Connection *, std::string)> &cb) {
+void Connection::set_message_callback(const std::function<void(Connection *, std::string)> &cb)
+{
     message_callback_ = cb;
 }
 
-void Connection::on_message() {
+void Connection::on_message()
+{
     char buffer[1024];
     while (true)
     {
@@ -84,5 +96,25 @@ void Connection::on_message() {
             close_callback();
             break;
         }
+    }
+}
+
+void Connection::send(const char* message, size_t len)
+{
+    output_buffer_.append(message, len);
+    client_channel_->enablewriting();
+}
+
+void Connection::write_callback()
+{
+    ssize_t n_write = ::send(fd(), output_buffer_.data(), output_buffer_.size(), 0);
+    if (n_write > 0)
+    {
+        output_buffer_.erase(0, n_write);
+    }
+
+    if (output_buffer_.size() == 0)
+    {
+        client_channel_->disablewriting();
     }
 }

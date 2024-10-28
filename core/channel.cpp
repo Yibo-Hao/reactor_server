@@ -27,6 +27,22 @@ void Channel::enablereading()
     loop_->update_channel(this);
 }
 
+void Channel::disablereading() {
+    events_ = events_ & ~EPOLLIN;
+    loop_->update_channel(this);
+}
+
+void Channel::enablewriting()
+{
+    events_ = events_ | EPOLLOUT;
+    loop_->update_channel(this);
+}
+
+void Channel::disablewriting() {
+    events_ = events_ & ~EPOLLOUT;
+    loop_->update_channel(this);
+}
+
 void Channel::setinepoll()
 {
     inepoll_ = true;
@@ -62,6 +78,10 @@ void Channel::handle_event()
     {
         read_callback_();
     }
+    else if (revents_ & EPOLLOUT)
+    {
+        write_callback_();
+    }
     else
     {
         error_callback_();
@@ -81,4 +101,9 @@ void Channel::set_close_callback(std::function<void()> fn)
 void Channel::set_error_callback(std::function<void()> fn)
 {
     error_callback_ = std::move(fn);
+}
+
+void Channel::set_write_callback(std::function<void()> fn)
+{
+    write_callback_ = std::move(fn);
 }

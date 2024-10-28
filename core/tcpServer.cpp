@@ -48,5 +48,5 @@ void TcpServer::message_connection(Connection* connection, std::string message) 
     int len = message.size();
     std::string tempBuf((char*)(&len), 4);
     tempBuf += message;
-    send(connection->fd(), tempBuf.data(), tempBuf.size() , 0);
+    connection->send(tempBuf.c_str(), tempBuf.size());
 }
