@@ -7,6 +7,7 @@ add_executable(client src/client.cpp)
 
 add_executable(server
 		${PROJECT_SOURCE_DIR}/src/server.cpp
+		${PROJECT_SOURCE_DIR}/src/echoServer.cpp
 		${PROJECT_SOURCE_DIR}/core/channel.cpp
 		${PROJECT_SOURCE_DIR}/core/eventLoop.cpp
 		${PROJECT_SOURCE_DIR}/core/epoll.cpp

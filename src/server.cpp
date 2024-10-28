@@ -1,10 +1,10 @@
 
-#include "tcpServer.h"
+#include "echoServer.h"
 
 int main()
 {
-    TcpServer tcpServer("127.0.0.1", 7175);
-    tcpServer.start();
+    EchoServer echoServer("127.0.0.1", 7175);
+    echoServer.start();
 
     return 0;
 }
