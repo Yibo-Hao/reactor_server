@@ -31,6 +31,8 @@ public:
     void close_connection(Connection* connection);
     void error_connection(Connection* connection);
     void message_connection(Connection* connection, std::string message);
+    void message_complete(Connection* connection);
+    void epoll_timeout(EventLoop *loop);
 };
 
 #endif //REACTOR_TCPSERVER_H

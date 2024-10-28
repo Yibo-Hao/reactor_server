@@ -14,6 +14,7 @@ class Channel;
 class EventLoop {
 private:
     Epoll *ep_;
+    std::function<void(EventLoop*)> epoll_timeout_callback_;
 public:
     EventLoop();
     ~EventLoop();
@@ -21,6 +22,7 @@ public:
     void run();
     Epoll *ep() const;
     void update_channel(Channel *ch);
+    void set_epoll_timeout_callback(std::function<void(EventLoop*)> fn);
 };
 
 #endif //REACTOR_EVENTLOOP_H

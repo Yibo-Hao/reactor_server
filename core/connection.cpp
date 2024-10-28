@@ -60,6 +60,11 @@ void Connection::set_message_callback(const std::function<void(Connection *, std
     message_callback_ = cb;
 }
 
+void Connection::set_send_complete_callback(const std::function<void(Connection *)> &cb)
+{
+    send_complete_callback_ = cb;
+}
+
 void Connection::on_message()
 {
     char buffer[1024];
@@ -116,5 +121,6 @@ void Connection::write_callback()
     if (output_buffer_.size() == 0)
     {
         client_channel_->disablewriting();
+        send_complete_callback_(this);
     }
 }

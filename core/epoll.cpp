@@ -14,7 +14,7 @@ Epoll::~Epoll()
     close(epoll_fd_);
 }
 
-void Epoll::update_channel(Channel* channel) const
+void Epoll:: update_channel(Channel* channel) const
 {
     epoll_event ev{};
     ev.data.ptr = channel;
@@ -51,7 +51,6 @@ std::vector<Channel *> Epoll::loop(int timeout)
 
     if (infds == 0)
     {
-        std::cout << "epoll_wait() timeout." << __FILE__ << __FUNCTION__ << __LINE__ << std::endl;
         return channels;
     }
 
@@ -63,4 +62,9 @@ std::vector<Channel *> Epoll::loop(int timeout)
     }
 
     return channels;
+}
+
+void Epoll::set_timeout_callback(const std::function<void(EventLoop *)> &cb)
+{
+    timeout_callback_ = cb;
 }

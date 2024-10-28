@@ -16,6 +16,7 @@
 #include "channel.h"
 
 class Channel;
+class EventLoop;
 
 class Epoll
 {
@@ -23,13 +24,14 @@ private:
     static const int MaxEvents = 100;
     int epoll_fd_{-1};
     epoll_event events_[MaxEvents]{};
+    std::function<void(EventLoop*)> timeout_callback_;
 public:
     Epoll();
     ~Epoll();
 
     void update_channel(Channel*) const;
     std::vector<Channel *> loop(int timeout = -1);
-
+    void set_timeout_callback(const std::function<void(EventLoop*)> &cb);
 };
 
 #endif
