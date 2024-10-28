@@ -26,7 +26,7 @@ void TcpServer::new_connection(Socket *client_socket) {
     Connection *connection = new Connection(loop_, client_socket);
     connection->set_close_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_error_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
-    std::cout << "New client connected: " << connection->fd() << connection->ip() << connection->port() << std::endl;
+    std::cout << "New client connected: fd:" << connection->fd() << " IP:" << connection->ip() << ":" << connection->port() << std::endl;
     connections_[connection->fd()] = connection;
 }
 

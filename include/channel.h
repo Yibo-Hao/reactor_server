@@ -40,7 +40,6 @@ public:
     uint32_t events() const;
     uint32_t revents() const;
     void handle_event();
-    void on_message();
 
     void set_read_callback(std::function<void()> fn);
     void set_close_callback(std::function<void()> fn);

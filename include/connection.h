@@ -11,6 +11,7 @@
 #include "socket.h"
 #include "channel.h"
 #include "functional"
+#include "reactorBuffer.h"
 
 class Channel;
 class EventLoop;
@@ -20,6 +21,9 @@ private:
     EventLoop *loop_;
     Socket *client_socket_;
     Channel *client_channel_;
+    Buffer input_buffer_;
+    Buffer output_buffer_;
+
     std::function<void(Connection*)> close_callback_;
     std::function<void(Connection*)> error_callback_;
 public:
@@ -30,6 +34,7 @@ public:
     std::string ip() const;
     uint16_t port() const;
 
+    void on_message();
     void close_callback();
     void error_callback();
 

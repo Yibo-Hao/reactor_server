@@ -68,35 +68,6 @@ void Channel::handle_event()
     }
 }
 
-void Channel::on_message()
-{
-    char buffer[1024];
-    while (true)
-    {
-        memset(&buffer, 0, sizeof(buffer));
-        ssize_t n_read = recv(fd_, buffer, sizeof(buffer), 0);
-        if (n_read > 0)
-        {
-            std::cout << "recv: " << buffer << std::endl;
-            send(fd_, "OK", 2, 0);
-        }
-        else if (n_read == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。
-        {
-            continue;
-        }
-        else if (n_read == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
-        {
-            break;
-        }
-        else if (n_read == 0)
-        {
-            std::cout << "Client disconnected: " << fd_ << std::endl;
-            close(fd_);
-            break;
-        }
-    }
-}
-
 void Channel::set_read_callback(std::function<void()> fn)
 {
     read_callback_ = std::move(fn);

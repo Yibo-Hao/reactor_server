@@ -27,6 +27,8 @@ public:
     int fd() const;
     std::string ip() const;
     uint16_t port() const;
+    void set_ip_port(const std::string& ip, uint16_t port);
+
     void set_reuse_addr(bool on);
     void set_reuse_port(bool on);
     void set_tcp_no_delay(bool on);

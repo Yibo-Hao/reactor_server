@@ -5,7 +5,7 @@
 
 Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket) {
     client_channel_ = new Channel(loop_, client_socket_->fd());
-    client_channel_->set_read_callback(std::bind(&Channel::on_message, client_channel_));
+    client_channel_->set_read_callback(std::bind(&Connection::on_message, this));
     client_channel_->set_error_callback(std::bind(&Connection::close_callback, this));
     client_channel_->set_close_callback(std::bind(&Connection::error_callback, this));
     client_channel_->enablereading();
@@ -43,4 +43,35 @@ void Connection::set_close_callback(const std::function<void(Connection *)> &cb)
 
 void Connection::set_error_callback(const std::function<void(Connection *)> &cb) {
     error_callback_ = cb;
+}
+
+void Connection::on_message() {
+    char buffer[1024];
+    while (true)
+    {
+        memset(&buffer, 0, sizeof(buffer));
+        ssize_t n_read = recv(fd(), buffer, sizeof(buffer), 0);
+        if (n_read > 0)
+        {
+            input_buffer_.append(buffer, n_read);
+        }
+        else if (n_read == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。
+        {
+            continue;
+        }
+        else if (n_read == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
+        {
+            std::cout << "recv: " << input_buffer_.data() << std::endl;
+            output_buffer_ = input_buffer_;
+            input_buffer_.clear();
+            send(fd(), output_buffer_.data(), output_buffer_.size() , 0);
+            break;
+        }
+        else if (n_read == 0)
+        {
+            std::cout << "Client disconnected: " << fd() << std::endl;
+            close_callback();
+            break;
+        }
+    }
 }
