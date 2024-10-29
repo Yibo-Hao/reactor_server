@@ -104,7 +104,7 @@ void Connection::on_message()
 
 void Connection::send(const char* message, size_t len)
 {
-    output_buffer_.append(message, len);
+    output_buffer_.append_with_head(message, len);
     client_channel_->enablewriting();
 }
 

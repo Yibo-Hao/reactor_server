@@ -38,10 +38,7 @@ void EchoServer::handle_message_connection(Connection* connection, std::string &
 {
     std::cout << "recv: " << message << std::endl;
     message = "reply:" + message;
-    size_t len = message.size();
-    std::string tmpBuf((char*)&len,4);
-    tmpBuf.append(message);
-    connection->send(tmpBuf.data(),tmpBuf.size());
+    connection->send(message.data(), message.size());
 }
 
 void EchoServer::handle_message_complete(Connection* connection)

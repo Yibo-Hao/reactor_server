@@ -14,6 +14,11 @@ void Buffer::append(const char *data, size_t len) {
     buf_.append(data, len);
 }
 
+void Buffer::append_with_head(const char *data, size_t len) {
+    buf_.append((char*)&len, 4);
+    buf_.append(data, len);
+}
+
 size_t Buffer::size() {
     return buf_.size();
 }
