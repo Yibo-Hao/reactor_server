@@ -6,9 +6,6 @@ ThreadPool::ThreadPool(size_t threadnum):stop_(false)
     {
 		threads_.emplace_back([this]
         {
-            printf("create thread(%ld).\n",syscall(SYS_gettid));     // 显示线程ID。
-            std::cout << "子线程：" << std::this_thread::get_id() << std::endl;
-
 			while (!stop_)
 			{
 				std::function<void()> task;
@@ -23,7 +20,6 @@ ThreadPool::ThreadPool(size_t threadnum):stop_(false)
 					this->taskqueue_.pop();
 				}
 
-                printf("thread is %ld.\n",syscall(SYS_gettid));
 				task();
 			}
 		});

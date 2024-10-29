@@ -17,6 +17,7 @@ EventLoop::~EventLoop()
 
 void EventLoop::run()
 {
+    std::cout << "EventLoop::run()," << "pid:" << getpid() <<",thread_id:" << std::this_thread::get_id() << std::endl;
     while(true)
     {
         std::vector<Channel*> channels = ep_->loop(10*1000);

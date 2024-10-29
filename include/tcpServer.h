@@ -10,16 +10,21 @@
 #include <iostream>
 #include <netinet/in.h>
 #include <map>
+#include <utility>
 
 #include "channel.h"
 #include "eventLoop.h"
 #include "inetAddress.h"
 #include "acceptor.h"
 #include "connection.h"
+#include "threadPool.h"
 
 class TcpServer {
 private:
-    EventLoop *loop_;
+    EventLoop *main_loop_;
+    std::vector<EventLoop*> sub_loops_;
+    ThreadPool *thread_pool_;
+    int thread_num_;
     Acceptor *acceptor_;
     std::map <int, Connection *> connections_;
     std::function<void(Connection*)> newconnectioncb_;
@@ -29,7 +34,7 @@ private:
     std::function<void(Connection*)> sendcompletecb_;
     std::function<void(EventLoop*)>  timeoutcb_;
 public:
-    TcpServer(const std::string &ip, const uint16_t &port);
+    TcpServer(const std::string &ip, const uint16_t &port, int thread_num = 3);
     ~TcpServer();
 
     void start();

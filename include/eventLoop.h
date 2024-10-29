@@ -5,6 +5,8 @@
 #ifndef REACTOR_EVENTLOOP_H
 #define REACTOR_EVENTLOOP_H
 
+#include <thread>
+
 #include "epoll.h"
 #include "channel.h"
 
