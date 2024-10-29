@@ -9,7 +9,8 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t &port, int thread_num
     acceptor_ = new Acceptor(main_loop_, ip, port);
     acceptor_->set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
     thread_pool_ = new ThreadPool(thread_num_);
-    for (int i = 0; i < thread_num_; ++i) {
+    for (int i = 0; i < thread_num_; ++i)
+    {
         sub_loops_.push_back(new EventLoop);
         sub_loops_[i]->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
         thread_pool_->addtask(std::bind(&EventLoop::run, sub_loops_[i]));
@@ -23,6 +24,12 @@ TcpServer::~TcpServer() {
     for (auto &connection : connections_) {
         delete connection.second;
     }
+
+    for (auto &sub_loop : sub_loops_) {
+        delete sub_loop;
+    }
+
+    delete thread_pool_;
 }
 
 void TcpServer::start() {
@@ -30,7 +37,7 @@ void TcpServer::start() {
 }
 
 void TcpServer::new_connection(Socket *client_socket) {
-    Connection *connection = new Connection(main_loop_, client_socket);
+    Connection *connection = new Connection(sub_loops_[client_socket->fd() / thread_num_], client_socket);
     connection->set_close_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_error_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_message_callback(std::bind(&TcpServer::message_connection, this, std::placeholders::_1, std::placeholders::_2));

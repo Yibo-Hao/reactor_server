@@ -3,7 +3,8 @@
 //
 #include "echoServer.h"
 
-EchoServer::EchoServer(const std::string &ip, const uint16_t &port) : tcp_server_(ip, port)
+EchoServer::EchoServer(const std::string &ip, const uint16_t &port, int sub_thread_num, int work_thread_num)
+: tcp_server_(ip, port, sub_thread_num), thread_pool_(work_thread_num)
 {
     tcp_server_.setnewconnectioncb(std::bind(&EchoServer::handle_new_connection, this, std::placeholders::_1));
     tcp_server_.setcloseconnectioncb(std::bind(&EchoServer::handle_close_connection, this, std::placeholders::_1));
@@ -36,9 +37,7 @@ void EchoServer::handle_error_connection(Connection* connection)
 
 void EchoServer::handle_message_connection(Connection* connection, std::string &message)
 {
-    std::cout << "recv: " << message << std::endl;
-    message = "reply:" + message;
-    connection->send(message.data(), message.size());
+    thread_pool_.addtask(std::bind(&EchoServer::on_message, this, connection, message));
 }
 
 void EchoServer::handle_message_complete(Connection* connection)
@@ -49,4 +48,11 @@ void EchoServer::handle_message_complete(Connection* connection)
 void EchoServer::handle_epoll_timeout(EventLoop *loop)
 {
     std::cout << "Epoll timeout." << std::endl;
+}
+
+void EchoServer::on_message(Connection *connection, std::string &message)
+{
+    std::cout << "recv: " << message << std::endl;
+    message = "reply:" + message;
+    connection->send(message.data(), message.size());
 }
