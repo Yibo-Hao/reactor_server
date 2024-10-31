@@ -3,7 +3,7 @@
 //
 #include "connection.h"
 
-Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket)
+Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket), disconnect_(false)
 {
     client_channel_ = new Channel(loop_, client_socket_->fd());
     client_channel_->set_read_callback(std::bind(&Connection::on_message, this));
@@ -37,11 +37,15 @@ uint16_t Connection::port() const
 
 void Connection::close_callback()
 {
+    disconnect_.store(true);
+    client_channel_->remove();
     close_callback_(shared_from_this());
 }
 
 void Connection::error_callback()
 {
+    disconnect_.store(true);
+    client_channel_->remove();
     error_callback_(shared_from_this());
 }
 
@@ -104,6 +108,11 @@ void Connection::on_message()
 
 void Connection::send(const char* message, size_t len)
 {
+    if (disconnect_.load())
+    {
+        std::cout << "connection has been closed" << std::endl;
+        return;
+    }
     output_buffer_.append_with_head(message, len);
     client_channel_->enablewriting();
 }

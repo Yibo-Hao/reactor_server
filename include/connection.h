@@ -7,6 +7,7 @@
 
 #include <string>
 #include <memory>
+#include <atomic>
 
 #include "eventLoop.h"
 #include "socket.h"
@@ -27,6 +28,7 @@ private:
     Channel *client_channel_;
     Buffer input_buffer_;
     Buffer output_buffer_;
+    std::atomic<bool> disconnect_;
 
     std::function<void(spConnection)> close_callback_;
     std::function<void(spConnection)> error_callback_;
