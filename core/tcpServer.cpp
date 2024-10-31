@@ -4,25 +4,21 @@
 #include "tcpServer.h"
 
 TcpServer::TcpServer(const std::string &ip, const uint16_t &port, int thread_num)
-: thread_num_(thread_num), main_loop_(std::make_unique<EventLoop>())
+: thread_num_(thread_num), main_loop_(std::make_unique<EventLoop>()), acceptor_(main_loop_, ip, port),
+thread_pool_(thread_num)
 {
     main_loop_->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
-    acceptor_ = new Acceptor(main_loop_, ip, port);
-    acceptor_->set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
-    thread_pool_ = new ThreadPool(thread_num_);
+    acceptor_.set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
     for (int i = 0; i < thread_num_; ++i)
     {
         sub_loops_.emplace_back(std::make_unique<EventLoop>());
         sub_loops_[i]->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
-        thread_pool_->addtask(std::bind(&EventLoop::run, sub_loops_[i].get()));
+        thread_pool_.addtask(std::bind(&EventLoop::run, sub_loops_[i].get()));
     }
 }
 
 TcpServer::~TcpServer()
-{
-    delete acceptor_;
-    delete thread_pool_;
-}
+= default;
 
 void TcpServer::start()
 {

@@ -24,9 +24,9 @@ class TcpServer {
 private:
     std::unique_ptr<EventLoop> main_loop_;
     std::vector<std::unique_ptr<EventLoop>> sub_loops_;
-    ThreadPool *thread_pool_;
+    Acceptor acceptor_;
     int thread_num_;
-    Acceptor *acceptor_;
+    ThreadPool thread_pool_;
     std::map <int, spConnection> connections_;
     std::function<void(spConnection)> newconnectioncb_;
     std::function<void(spConnection)> closeconnectioncb_;
