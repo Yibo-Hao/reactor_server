@@ -30,6 +30,7 @@ public:
     ~Epoll();
 
     void update_channel(Channel*) const;
+    void remove_channel(Channel*) const;
     std::vector<Channel *> loop(int timeout = -1);
     void set_timeout_callback(const std::function<void(EventLoop*)> &cb);
 };

@@ -24,6 +24,7 @@ public:
     void run();
     Epoll *ep() const;
     void update_channel(Channel *ch);
+    void remove_channel(Channel *ch);
     void set_epoll_timeout_callback(std::function<void(EventLoop*)> fn);
 };
 

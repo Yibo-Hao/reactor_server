@@ -36,6 +36,8 @@ public:
     void useet(); // 采用边缘触发
     void enablereading();
     void disablereading();
+    void disableall();
+    void remove();
     void enablewriting();
     void disablewriting();
     void setinepoll();

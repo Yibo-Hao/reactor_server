@@ -68,3 +68,15 @@ void Epoll::set_timeout_callback(const std::function<void(EventLoop *)> &cb)
 {
     timeout_callback_ = cb;
 }
+
+void Epoll::remove_channel(Channel *ch) const
+{
+    if (ch->inpoll())         // 如果channel已经在树上了。
+    {
+        if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, ch->fd(), 0)==-1)
+        {
+            std::cout << "epoll_ctl() failed" << std::endl;
+            exit(-1);
+        }
+    }
+}

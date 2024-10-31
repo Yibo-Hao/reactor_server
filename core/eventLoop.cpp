@@ -40,6 +40,11 @@ void EventLoop::update_channel(Channel *ch)
     ep_->update_channel(ch);
 }
 
+void EventLoop::remove_channel(Channel *ch)
+{
+    ep_->remove_channel(ch);
+}
+
 void EventLoop::set_epoll_timeout_callback(std::function<void(EventLoop*)> fn)
 {
     epoll_timeout_callback_ = std::move(fn);

@@ -72,6 +72,7 @@ void Channel::handle_event()
 {
     if (revents_ & EPOLLRDHUP)
     {
+        remove();
         close_callback_();
     }
     else if (revents_ & (EPOLLIN | EPOLLPRI))
@@ -84,6 +85,7 @@ void Channel::handle_event()
     }
     else
     {
+        remove();
         error_callback_();
     }
 }
@@ -106,4 +108,16 @@ void Channel::set_error_callback(std::function<void()> fn)
 void Channel::set_write_callback(std::function<void()> fn)
 {
     write_callback_ = std::move(fn);
+}
+
+void Channel::disableall()
+{
+    events_ = 0;
+    loop_->update_channel(this);
+}
+
+void Channel::remove()
+{
+    disableall();
+    loop_->remove_channel(this);
 }
