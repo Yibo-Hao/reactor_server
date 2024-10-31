@@ -17,13 +17,13 @@ public:
     ~EchoServer();
 
     void start();
-    void handle_new_connection(Connection *connection);
-    void handle_close_connection(Connection* connection);
-    void handle_error_connection(Connection* connection);
-    void handle_message_connection(Connection* connection, std::string &message);
-    void handle_message_complete(Connection* connection);
+    void handle_new_connection(spConnection connection);
+    void handle_close_connection(spConnection connection);
+    void handle_error_connection(spConnection connection);
+    void handle_message_connection(spConnection connection, std::string &message);
+    void handle_message_complete(spConnection connection);
     void handle_epoll_timeout(EventLoop *loop);
-    void on_message(Connection *conn, std::string &message);
+    void on_message(spConnection conn, std::string &message);
 };
 
 #endif //REACTOR_ECHO_SERVER_H

@@ -37,30 +37,30 @@ uint16_t Connection::port() const
 
 void Connection::close_callback()
 {
-    close_callback_(this);
+    close_callback_(shared_from_this());
 }
 
 void Connection::error_callback()
 {
-    error_callback_(this);
+    error_callback_(shared_from_this());
 }
 
-void Connection::set_close_callback(const std::function<void(Connection *)> &cb)
+void Connection::set_close_callback(const std::function<void(spConnection)> &cb)
 {
     close_callback_ = cb;
 }
 
-void Connection::set_error_callback(const std::function<void(Connection *)> &cb)
+void Connection::set_error_callback(const std::function<void(spConnection)> &cb)
 {
     error_callback_ = cb;
 }
 
-void Connection::set_message_callback(const std::function<void(Connection *, std::string&)> &cb)
+void Connection::set_message_callback(const std::function<void(spConnection, std::string&)> &cb)
 {
     message_callback_ = cb;
 }
 
-void Connection::set_send_complete_callback(const std::function<void(Connection *)> &cb)
+void Connection::set_send_complete_callback(const std::function<void(spConnection)> &cb)
 {
     send_complete_callback_ = cb;
 }
@@ -90,7 +90,7 @@ void Connection::on_message()
                 }
                 std::string message(input_buffer_.data() + 4, len);
                 input_buffer_.erase(0, len + 4);
-                message_callback_(this, message);
+                message_callback_(shared_from_this(), message);
             }
             break;
         }
@@ -119,6 +119,6 @@ void Connection::write_callback()
     if (output_buffer_.size() == 0)
     {
         client_channel_->disablewriting();
-        send_complete_callback_(this);
+        send_complete_callback_(shared_from_this());
     }
 }

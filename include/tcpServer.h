@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <map>
 #include <utility>
+#include <memory>
 
 #include "channel.h"
 #include "eventLoop.h"
@@ -26,12 +27,12 @@ private:
     ThreadPool *thread_pool_;
     int thread_num_;
     Acceptor *acceptor_;
-    std::map <int, Connection *> connections_;
-    std::function<void(Connection*)> newconnectioncb_;
-    std::function<void(Connection*)> closeconnectioncb_;
-    std::function<void(Connection*)> errorconnectioncb_;
-    std::function<void(Connection*,std::string &message)> onmessagecb_;
-    std::function<void(Connection*)> sendcompletecb_;
+    std::map <int, spConnection> connections_;
+    std::function<void(spConnection)> newconnectioncb_;
+    std::function<void(spConnection)> closeconnectioncb_;
+    std::function<void(spConnection)> errorconnectioncb_;
+    std::function<void(spConnection,std::string &message)> onmessagecb_;
+    std::function<void(spConnection)> sendcompletecb_;
     std::function<void(EventLoop*)>  timeoutcb_;
 public:
     TcpServer(const std::string &ip, const uint16_t &port, int thread_num = 3);
@@ -39,17 +40,17 @@ public:
 
     void start();
     void new_connection(Socket *client_socket);
-    void close_connection(Connection* connection);
-    void error_connection(Connection* connection);
-    void message_connection(Connection* connection, std::string &message);
-    void message_complete(Connection* connection);
+    void close_connection(spConnection connection);
+    void error_connection(spConnection connection);
+    void message_connection(spConnection connection, std::string &message);
+    void message_complete(spConnection connection);
     void epoll_timeout(EventLoop *loop);
 
-    void setnewconnectioncb(std::function<void(Connection*)> fn);
-    void setcloseconnectioncb(std::function<void(Connection*)> fn);
-    void seterrorconnectioncb(std::function<void(Connection*)> fn);
-    void setonmessagecb(std::function<void(Connection*,std::string &message)> fn);
-    void setsendcompletecb(std::function<void(Connection*)> fn);
+    void setnewconnectioncb(std::function<void(spConnection)> fn);
+    void setcloseconnectioncb(std::function<void(spConnection)> fn);
+    void seterrorconnectioncb(std::function<void(spConnection)> fn);
+    void setonmessagecb(std::function<void(spConnection,std::string &message)> fn);
+    void setsendcompletecb(std::function<void(spConnection)> fn);
     void settimeoutcb(std::function<void(EventLoop*)> fn);
 };
 

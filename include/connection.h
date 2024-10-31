@@ -6,6 +6,7 @@
 #define REACTOR_CONNECTION_H
 
 #include <string>
+#include <memory>
 
 #include "eventLoop.h"
 #include "socket.h"
@@ -15,8 +16,11 @@
 
 class Channel;
 class EventLoop;
+class Connection;
 
-class Connection {
+using spConnection = std::shared_ptr<Connection>;
+
+class Connection : public std::enable_shared_from_this<Connection> {
 private:
     EventLoop *loop_;
     Socket *client_socket_;
@@ -24,10 +28,10 @@ private:
     Buffer input_buffer_;
     Buffer output_buffer_;
 
-    std::function<void(Connection*)> close_callback_;
-    std::function<void(Connection*)> error_callback_;
-    std::function<void(Connection*, std::string&)> message_callback_;
-    std::function<void(Connection*)> send_complete_callback_;
+    std::function<void(spConnection)> close_callback_;
+    std::function<void(spConnection)> error_callback_;
+    std::function<void(spConnection, std::string&)> message_callback_;
+    std::function<void(spConnection)> send_complete_callback_;
 public:
     Connection(EventLoop *loop, Socket* client_socket);
     ~Connection();
@@ -42,10 +46,10 @@ public:
     void error_callback();
     void write_callback();
 
-    void set_close_callback(const std::function<void(Connection*)> &cb);
-    void set_error_callback(const std::function<void(Connection*)> &cb);
-    void set_message_callback(const std::function<void(Connection*, std::string&)> &cb);
-    void set_send_complete_callback(const std::function<void(Connection*)> &cb);
+    void set_close_callback(const std::function<void(spConnection)> &cb);
+    void set_error_callback(const std::function<void(spConnection)> &cb);
+    void set_message_callback(const std::function<void(spConnection, std::string&)> &cb);
+    void set_send_complete_callback(const std::function<void(spConnection)> &cb);
 };
 
 #endif //REACTOR_CONNECTION_H

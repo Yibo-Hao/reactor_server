@@ -20,27 +20,27 @@ void EchoServer::start()
     tcp_server_.start();
 }
 
-void EchoServer::handle_new_connection(Connection *connection)
+void EchoServer::handle_new_connection(spConnection connection)
 {
     std::cout << "New connection." << std::endl;
 }
 
-void EchoServer::handle_close_connection(Connection* connection)
+void EchoServer::handle_close_connection(spConnection connection)
 {
     std::cout << "Connection closed." << std::endl;
 }
 
-void EchoServer::handle_error_connection(Connection* connection)
+void EchoServer::handle_error_connection(spConnection connection)
 {
     std::cout << "Connection error." << std::endl;
 }
 
-void EchoServer::handle_message_connection(Connection* connection, std::string &message)
+void EchoServer::handle_message_connection(spConnection connection, std::string &message)
 {
     thread_pool_.addtask(std::bind(&EchoServer::on_message, this, connection, message));
 }
 
-void EchoServer::handle_message_complete(Connection* connection)
+void EchoServer::handle_message_complete(spConnection connection)
 {
     std::cout << "Message send complete." << std::endl;
 }
@@ -50,7 +50,7 @@ void EchoServer::handle_epoll_timeout(EventLoop *loop)
     std::cout << "Epoll timeout." << std::endl;
 }
 
-void EchoServer::on_message(Connection *connection, std::string &message)
+void EchoServer::on_message(spConnection connection, std::string &message)
 {
     std::cout << "recv: " << message << std::endl;
     message = "reply:" + message;
