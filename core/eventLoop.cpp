@@ -3,17 +3,12 @@
 //
 #include "eventLoop.h"
 
-#include <utility>
-
-EventLoop::EventLoop()
+EventLoop::EventLoop() : ep_(std::make_unique<Epoll>())
 {
-    ep_ = new Epoll();
 }
 
 EventLoop::~EventLoop()
-{
-    delete ep_;
-}
+= default;
 
 void EventLoop::run()
 {
@@ -28,11 +23,6 @@ void EventLoop::run()
             channel->handle_event();
         });
     }
-}
-
-Epoll *EventLoop::ep() const
-{
-    return ep_;
 }
 
 void EventLoop::update_channel(Channel *ch)

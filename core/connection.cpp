@@ -3,22 +3,20 @@
 //
 #include "connection.h"
 
-Connection::Connection(EventLoop *loop, Socket *client_socket) : loop_(loop), client_socket_(client_socket), disconnect_(false)
+Connection::Connection(const std::unique_ptr<EventLoop> &loop, std::unique_ptr<Socket> client_socket)
+: loop_(loop), client_socket_(std::move(client_socket)),
+client_channel_(std::make_unique<Channel>(loop_, client_socket_->fd())), disconnect_(false)
 {
-    client_channel_ = new Channel(loop_, client_socket_->fd());
-    client_channel_->set_read_callback(std::bind(&Connection::on_message, this));
-    client_channel_->set_error_callback(std::bind(&Connection::close_callback, this));
-    client_channel_->set_close_callback(std::bind(&Connection::error_callback, this));
-    client_channel_->set_write_callback(std::bind(&Connection::write_callback, this));
+    client_channel_->set_read_callback([this] { on_message(); });
+    client_channel_->set_error_callback([this] { close_callback(); });
+    client_channel_->set_close_callback([this] { error_callback(); });
+    client_channel_->set_write_callback([this] { write_callback(); });
     client_channel_->enablereading();
     client_channel_->useet();
 }
 
 Connection::~Connection()
-{
-    delete client_channel_;
-    delete client_socket_;
-}
+= default;
 
 int Connection::fd() const
 {

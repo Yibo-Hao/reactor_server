@@ -6,6 +6,7 @@
 #define REACTOR_EVENTLOOP_H
 
 #include <thread>
+#include <utility>
 
 #include "epoll.h"
 #include "channel.h"
@@ -15,14 +16,13 @@ class Channel;
 
 class EventLoop {
 private:
-    Epoll *ep_;
+    std::unique_ptr<Epoll> ep_;
     std::function<void(EventLoop*)> epoll_timeout_callback_;
 public:
     EventLoop();
     ~EventLoop();
 
     void run();
-    Epoll *ep() const;
     void update_channel(Channel *ch);
     void remove_channel(Channel *ch);
     void set_epoll_timeout_callback(std::function<void(EventLoop*)> fn);

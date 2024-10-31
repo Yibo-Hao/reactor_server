@@ -22,8 +22,8 @@
 
 class TcpServer {
 private:
-    EventLoop *main_loop_;
-    std::vector<EventLoop*> sub_loops_;
+    std::unique_ptr<EventLoop> main_loop_;
+    std::vector<std::unique_ptr<EventLoop>> sub_loops_;
     ThreadPool *thread_pool_;
     int thread_num_;
     Acceptor *acceptor_;
@@ -39,7 +39,7 @@ public:
     ~TcpServer();
 
     void start();
-    void new_connection(Socket *client_socket);
+    void new_connection(std::unique_ptr<Socket> client_socket);
     void close_connection(spConnection connection);
     void error_connection(spConnection connection);
     void message_connection(spConnection connection, std::string &message);

@@ -20,7 +20,7 @@ class EventLoop;
 class Channel {
 private:
     int fd_ = -1; // Channel 拥有的 fd，一对一
-    EventLoop *loop_ = nullptr;
+    const std::unique_ptr<EventLoop> &loop_;
     bool inepoll_ = false; // 是否已经添加到 epoll 树中
     uint32_t events_ = 0;
     uint32_t revents_ = 0;
@@ -29,7 +29,7 @@ private:
     std::function<void()> error_callback_;
     std::function<void()> write_callback_;
 public:
-    Channel(EventLoop *loop, int fd);
+    Channel(const std::unique_ptr<EventLoop> &loop, int fd);
     ~Channel();
 
     int fd() const;
