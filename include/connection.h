@@ -14,6 +14,7 @@
 #include "channel.h"
 #include "functional"
 #include "reactorBuffer.h"
+#include "timestamp.h"
 
 class Channel;
 class EventLoop;
@@ -29,6 +30,7 @@ private:
     Buffer input_buffer_;
     Buffer output_buffer_;
     std::atomic<bool> disconnect_;
+    Timestamp lastTime_;
 
     std::function<void(spConnection)> close_callback_;
     std::function<void(spConnection)> error_callback_;

@@ -18,7 +18,7 @@ add_executable(server
 		${PROJECT_SOURCE_DIR}/core/connection.cpp
 		${PROJECT_SOURCE_DIR}/core/reactorBuffer.cpp
 		${PROJECT_SOURCE_DIR}/core/threadPool.cpp
-		${PROJECT_SOURCE_DIR}/core/Timestamp.cpp
+		${PROJECT_SOURCE_DIR}/core/timestamp.cpp
 )
 
 target_include_directories(server PRIVATE include)

@@ -92,6 +92,7 @@ void Connection::on_message()
                 }
                 std::string message(input_buffer_.data() + 4, len);
                 input_buffer_.erase(0, len + 4);
+                lastTime_ = Timestamp::now();
                 message_callback_(shared_from_this(), message);
             }
             break;

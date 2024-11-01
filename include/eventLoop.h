@@ -13,6 +13,8 @@
 #include <functional>
 #include <queue>
 #include <mutex>
+#include <unistd.h>
+#include <sys/timerfd.h>
 
 #include "epoll.h"
 #include "channel.h"
@@ -28,9 +30,12 @@ private:
     std::mutex mutex_;
     pid_t thread_id_{};
     int wakeup_fd_;
-    std::unique_ptr<Channel> wakeup_channel;
+    std::unique_ptr<Channel> wakeup_channel_;
+    int timer_fd_;
+    bool main_loop_;
+    std::unique_ptr<Channel> timer_channel_;
 public:
-    EventLoop();
+    explicit EventLoop(bool main_loop);
     ~EventLoop();
 
     void run();
@@ -41,6 +46,7 @@ public:
     void queue_in_loop(std::function<void()> fn);
     void wakeup() const;
     void handle_wakeup();
+    void handle_timer() const;
 };
 
 #endif //REACTOR_EVENTLOOP_H
