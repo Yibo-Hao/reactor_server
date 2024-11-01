@@ -55,6 +55,8 @@ public:
     void set_error_callback(const std::function<void(spConnection)> &cb);
     void set_message_callback(const std::function<void(spConnection, std::string&)> &cb);
     void set_send_complete_callback(const std::function<void(spConnection)> &cb);
+
+    bool timeout(time_t now, int gap);
 };
 
 #endif //REACTOR_CONNECTION_H

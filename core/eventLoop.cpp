@@ -5,7 +5,7 @@
 
 int create_timer_fd(int sec = 30)
 {
-    int tfd=timerfd_create(CLOCK_MONOTONIC,TFD_CLOEXEC|TFD_NONBLOCK);
+    int tfd = timerfd_create(CLOCK_MONOTONIC,TFD_CLOEXEC|TFD_NONBLOCK);
     struct itimerspec timeout{};
     memset(&timeout,0,sizeof(struct itimerspec));
     timeout.it_value.tv_sec = sec;
@@ -14,15 +14,16 @@ int create_timer_fd(int sec = 30)
     return tfd;
 }
 
-EventLoop::EventLoop(bool main_loop)
+EventLoop::EventLoop(bool main_loop, int time_tvl, int time_out)
 : ep_(std::make_unique<Epoll>()), wakeup_fd_(eventfd(0, EFD_NONBLOCK)),
-wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)), timer_fd_(create_timer_fd()),
-timer_channel_(std::make_unique<Channel>(this, timer_fd_)), main_loop_(main_loop)
+wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)), main_loop_(main_loop),
+time_tvl_(time_tvl), time_out_(time_out), timer_fd_(create_timer_fd(time_out)),
+timer_channel_(std::make_unique<Channel>(this, timer_fd_))
 {
     wakeup_channel_->set_read_callback([this] { handle_wakeup(); });
     wakeup_channel_->enablereading();
 
-    timer_channel_->set_read_callback([this] { handle_timer(); });
+    timer_channel_->set_read_callback(std::bind(&EventLoop::handle_timer, this));
     timer_channel_->enablereading();
 }
 
@@ -95,14 +96,39 @@ void EventLoop::handle_wakeup()
     }
 }
 
-void EventLoop::handle_timer() const
+void EventLoop::handle_timer()
 {
     struct itimerspec timeout{};
     memset(&timeout, 0, sizeof(struct itimerspec));
-    timeout.it_value.tv_sec = 5;
+    timeout.it_value.tv_sec = time_tvl_;
     timeout.it_value.tv_nsec = 0;
-    timerfd_settime(timer_fd_, 0, &timeout, 0);
-    if (main_loop_) {
-        std::cout << "timer is triggered" << std::endl;
+    timerfd_settime(timer_fd_, 0, &timeout, nullptr);
+    if (!main_loop_) {
+        std::cout << "EventLoop::handle_timer() thread is " << syscall(SYS_gettid) << std::endl;
+        time_t now = time(nullptr);
+
+        for (auto it = connection_map_.begin(); it != connection_map_.end(); ) {
+            if (it->second->timeout(now, time_out_)) {
+                timer_callback_(it->first);  // 使用新的迭代器值
+                {
+                    std::lock_guard<std::mutex> lock(connection_mutex_);
+                    it = connection_map_.erase(it);  // 使用 erase 返回的新迭代器
+                }
+            } else {
+                ++it;  // 继续前进
+            }
+        }
+
     }
+}
+
+void EventLoop::new_connection(const spConnection& connection)
+{
+    std::lock_guard lock(connection_mutex_);
+    connection_map_[connection->fd()] = connection;
+}
+
+void EventLoop::set_timer_callback(std::function<void(int)> fn)
+{
+    timer_callback_ = std::move(fn);
 }

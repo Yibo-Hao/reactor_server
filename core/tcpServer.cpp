@@ -11,7 +11,8 @@ thread_pool_(thread_num)
     acceptor_.set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
     for (int i = 0; i < thread_num_; ++i)
     {
-        sub_loops_.emplace_back(new EventLoop(false));
+        sub_loops_.emplace_back(new EventLoop(false, 5, 10));
+        sub_loops_[i]->set_timer_callback(std::bind(&TcpServer::remove_connection, this, std::placeholders::_1));
         sub_loops_[i]->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
         thread_pool_.addtask(std::bind(&EventLoop::run, sub_loops_[i].get()));
     }
@@ -32,19 +33,23 @@ void TcpServer::new_connection(std::unique_ptr<Socket> client_socket)
     connection->set_error_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_message_callback(std::bind(&TcpServer::message_connection, this, std::placeholders::_1, std::placeholders::_2));
     connection->set_send_complete_callback(std::bind(&TcpServer::message_complete, this, std::placeholders::_1));
-    connections_[connection->fd()] = connection;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        connections_[connection->fd()] = connection;
+    }
+    sub_loops_[connection->fd() % thread_num_]->new_connection(connection);
     if (newconnectioncb_) newconnectioncb_(connection);
 }
 
 void TcpServer::close_connection(spConnection connection)
 {
     if (closeconnectioncb_) closeconnectioncb_(connection);
-    connections_.erase(connection->fd());
+    remove_connection(connection->fd());
 }
 
 void TcpServer::error_connection(spConnection connection) {
     if (errorconnectioncb_) errorconnectioncb_(connection);
-    connections_.erase(connection->fd());
+    remove_connection(connection->fd());
 }
 
 void TcpServer::message_connection(spConnection connection, std::string &message) {
@@ -87,4 +92,10 @@ void TcpServer::setsendcompletecb(std::function<void(spConnection)> fn)
 void TcpServer::settimeoutcb(std::function<void(EventLoop*)> fn)
 {
     timeoutcb_ = std::move(fn);
+}
+
+void TcpServer::remove_connection(int fd)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    connections_.erase(fd);
 }

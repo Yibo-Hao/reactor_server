@@ -27,6 +27,7 @@ private:
     Acceptor acceptor_;
     int thread_num_;
     ThreadPool thread_pool_;
+    std::mutex mutex_;
     std::map <int, spConnection> connections_;
     std::function<void(spConnection)> newconnectioncb_;
     std::function<void(spConnection)> closeconnectioncb_;
@@ -52,6 +53,8 @@ public:
     void setonmessagecb(std::function<void(spConnection,std::string &message)> fn);
     void setsendcompletecb(std::function<void(spConnection)> fn);
     void settimeoutcb(std::function<void(EventLoop*)> fn);
+
+    void remove_connection(int fd);
 };
 
 #endif //REACTOR_TCPSERVER_H

@@ -16,7 +16,9 @@ client_channel_(std::make_unique<Channel>(loop_, client_socket_->fd())), disconn
 }
 
 Connection::~Connection()
-= default;
+{
+    std::cout << "Connection destructed" << std::endl;
+}
 
 int Connection::fd() const
 {
@@ -146,4 +148,9 @@ void Connection::write_callback()
         client_channel_->disablewriting();
         send_complete_callback_(shared_from_this());
     }
+}
+
+bool Connection::timeout(time_t now, int gap)
+{
+    return now - lastTime_.to_int() > gap;
 }
