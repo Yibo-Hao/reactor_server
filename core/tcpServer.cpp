@@ -26,6 +26,16 @@ void TcpServer::start()
     main_loop_->run();
 }
 
+void TcpServer::stop()
+{
+    main_loop_->stop();
+    for (int i = 0; i < thread_num_; ++i)
+    {
+        sub_loops_[i]->stop();
+    }
+    thread_pool_.stop();
+}
+
 void TcpServer::new_connection(std::unique_ptr<Socket> client_socket)
 {
     spConnection connection = std::make_shared<Connection>(sub_loops_[client_socket->fd() % thread_num_].get(), std::move(client_socket));

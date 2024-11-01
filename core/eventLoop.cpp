@@ -18,7 +18,7 @@ EventLoop::EventLoop(bool main_loop, int time_tvl, int time_out)
 : ep_(std::make_unique<Epoll>()), wakeup_fd_(eventfd(0, EFD_NONBLOCK)),
 wakeup_channel_(std::make_unique<Channel>(this, wakeup_fd_)), main_loop_(main_loop),
 time_tvl_(time_tvl), time_out_(time_out), timer_fd_(create_timer_fd(time_out)),
-timer_channel_(std::make_unique<Channel>(this, timer_fd_))
+timer_channel_(std::make_unique<Channel>(this, timer_fd_)), stop_(false)
 {
     wakeup_channel_->set_read_callback([this] { handle_wakeup(); });
     wakeup_channel_->enablereading();
@@ -33,7 +33,7 @@ EventLoop::~EventLoop()
 void EventLoop::run()
 {
     thread_id_ = ::syscall(SYS_gettid);
-    while(true)
+    while(stop_ == false)
     {
         std::vector<Channel*> channels = ep_->loop(10*1000);
         if (channels.empty()) {
@@ -43,6 +43,12 @@ void EventLoop::run()
             channel->handle_event();
         });
     }
+}
+
+void EventLoop::stop()
+{
+    stop_ = true;
+    wakeup();
 }
 
 void EventLoop::update_channel(Channel *ch)

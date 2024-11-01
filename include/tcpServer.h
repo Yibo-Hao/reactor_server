@@ -40,6 +40,7 @@ public:
     ~TcpServer();
 
     void start();
+    void stop();
     void new_connection(std::unique_ptr<Socket> client_socket);
     void close_connection(spConnection connection);
     void error_connection(spConnection connection);

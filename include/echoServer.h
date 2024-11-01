@@ -17,6 +17,7 @@ public:
     ~EchoServer();
 
     void start();
+    void stop();
     void handle_new_connection(spConnection connection);
     void handle_close_connection(spConnection connection);
     void handle_error_connection(spConnection connection);

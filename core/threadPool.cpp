@@ -38,11 +38,15 @@ void ThreadPool::addtask(std::function<void()> task)
 
 ThreadPool::~ThreadPool()
 {
-	stop_ = true;
+    stop();
+}
 
-	condition_.notify_all();
-
-	for (std::thread &th : threads_) th.join();
+void ThreadPool::stop()
+{
+    if (stop_) return;
+    stop_ = true;
+    condition_.notify_all();
+    for (std::thread &th : threads_) th.join();
 }
 
 size_t ThreadPool::size() const

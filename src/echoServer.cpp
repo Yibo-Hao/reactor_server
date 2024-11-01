@@ -20,6 +20,12 @@ void EchoServer::start()
     tcp_server_.start();
 }
 
+void EchoServer::stop()
+{
+    thread_pool_.stop();
+    tcp_server_.stop();
+}
+
 void EchoServer::handle_new_connection(spConnection connection)
 {
     std::cout << "New connection." << std::endl;

@@ -14,6 +14,7 @@
 #include <queue>
 #include <mutex>
 #include <map>
+#include <atomic>
 #include <unistd.h>
 #include <sys/timerfd.h>
 
@@ -43,11 +44,13 @@ private:
     int time_out_;
     int timer_fd_;
     std::unique_ptr<Channel> timer_channel_;
+    std::atomic<bool> stop_{false};
 public:
     explicit EventLoop(bool main_loop, int time_tvl = 3, int time_out = 8);
     ~EventLoop();
 
     void run();
+    void stop();
     void update_channel(Channel *ch);
     void remove_channel(Channel *ch);
     bool is_in_loop_thread() const;

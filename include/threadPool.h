@@ -28,6 +28,7 @@ public:
     // 把任务添加到队列中。
     void addtask(std::function<void()> task);
     size_t size() const;
+    void stop();
 
     // 在析构函数中将停止线程。
 	~ThreadPool();
