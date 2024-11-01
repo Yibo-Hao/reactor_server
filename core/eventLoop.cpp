@@ -110,7 +110,6 @@ void EventLoop::handle_timer()
     timeout.it_value.tv_nsec = 0;
     timerfd_settime(timer_fd_, 0, &timeout, nullptr);
     if (!main_loop_) {
-        std::cout << "EventLoop::handle_timer() thread is " << syscall(SYS_gettid) << std::endl;
         time_t now = time(nullptr);
 
         for (auto it = connection_map_.begin(); it != connection_map_.end(); ) {

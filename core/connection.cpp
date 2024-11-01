@@ -117,26 +117,22 @@ void Connection::send(const char* message, size_t len)
 
     if (loop_->is_in_loop_thread())
     {
-        std::cout << "send in IO thread: " << ::syscall(SYS_gettid) << std::endl;
         send_in_poll(message, len);
     }
     else
     {
-        std::cout << "send in work thread: " << ::syscall(SYS_gettid) << std::endl;
         loop_->queue_in_loop(std::bind(&Connection::send_in_poll, this, message, len));
     }
 }
 
 void Connection::send_in_poll(const char* message, size_t len)
 {
-    std::cout << "send in thread: " << ::syscall(SYS_gettid) << std::endl;
     output_buffer_.append_with_head(message, len);
     client_channel_->enablewriting();
 }
 
 void Connection::write_callback()
 {
-    std::cout << "write_callback in IO thread: " << ::syscall(SYS_gettid) << std::endl;
     ssize_t n_write = ::send(fd(), output_buffer_.data(), output_buffer_.size(), 0);
     if (n_write > 0)
     {

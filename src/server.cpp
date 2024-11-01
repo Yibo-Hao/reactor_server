@@ -7,8 +7,8 @@ EchoServer *echoServer;
 void Stop(int sig) // 信号2和15的处理函数，功能是停止服务程序。
 {
     printf("sig=%d\n",sig);
-//    echoServer->Stop();
-    printf("echoServer已停止。\n");
+    echoServer->stop();
+    printf("stop echoServer。\n");
     delete echoServer;
     printf("delete echoServer。\n");
     exit(0);
