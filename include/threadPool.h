@@ -23,11 +23,11 @@ private:
 	std::condition_variable condition_;
 	std::atomic_bool stop_;
 public:
-    // 在构造函数中将启动threadnum个线程，
-	ThreadPool(size_t threadnum);
+	explicit ThreadPool(size_t threadnum);
 
     // 把任务添加到队列中。
-    void addtask(std::function<void()> task);   
+    void addtask(std::function<void()> task);
+    size_t size() const;
 
     // 在析构函数中将停止线程。
 	~ThreadPool();

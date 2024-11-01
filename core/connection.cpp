@@ -3,7 +3,7 @@
 //
 #include "connection.h"
 
-Connection::Connection(const std::unique_ptr<EventLoop> &loop, std::unique_ptr<Socket> client_socket)
+Connection::Connection(EventLoop *loop, std::unique_ptr<Socket> client_socket)
 : loop_(loop), client_socket_(std::move(client_socket)),
 client_channel_(std::make_unique<Channel>(loop_, client_socket_->fd())), disconnect_(false)
 {
@@ -111,6 +111,21 @@ void Connection::send(const char* message, size_t len)
         std::cout << "connection has been closed" << std::endl;
         return;
     }
+
+    if (loop_->is_in_loop_thread())
+    {
+        std::cout << "send in IO thread" << std::endl;
+        send_in_poll(message, len);
+    }
+    else
+    {
+        std::cout << "send in work thread" << std::endl;
+        loop_->queue_in_loop(std::bind(&Connection::send_in_poll, this, message, len));
+    }
+}
+
+void Connection::send_in_poll(const char* message, size_t len)
+{
     output_buffer_.append_with_head(message, len);
     client_channel_->enablewriting();
 }

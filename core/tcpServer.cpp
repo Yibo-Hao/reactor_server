@@ -4,14 +4,14 @@
 #include "tcpServer.h"
 
 TcpServer::TcpServer(const std::string &ip, const uint16_t &port, int thread_num)
-: thread_num_(thread_num), main_loop_(std::make_unique<EventLoop>()), acceptor_(main_loop_, ip, port),
+: thread_num_(thread_num), main_loop_(std::make_unique<EventLoop>()), acceptor_(main_loop_.get(), ip, port),
 thread_pool_(thread_num)
 {
     main_loop_->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
     acceptor_.set_new_connection_callback(std::bind(&TcpServer::new_connection, this, std::placeholders::_1));
     for (int i = 0; i < thread_num_; ++i)
     {
-        sub_loops_.emplace_back(std::make_unique<EventLoop>());
+        sub_loops_.emplace_back(new EventLoop);
         sub_loops_[i]->set_epoll_timeout_callback(std::bind(&TcpServer::epoll_timeout, this, std::placeholders::_1));
         thread_pool_.addtask(std::bind(&EventLoop::run, sub_loops_[i].get()));
     }
@@ -27,7 +27,7 @@ void TcpServer::start()
 
 void TcpServer::new_connection(std::unique_ptr<Socket> client_socket)
 {
-    spConnection connection = std::make_shared<Connection>(sub_loops_[client_socket->fd() / thread_num_], std::move(client_socket));
+    spConnection connection = std::make_shared<Connection>(sub_loops_[client_socket->fd() % thread_num_].get(), std::move(client_socket));
     connection->set_close_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_error_callback(std::bind(&TcpServer::close_connection, this, std::placeholders::_1));
     connection->set_message_callback(std::bind(&TcpServer::message_connection, this, std::placeholders::_1, std::placeholders::_2));

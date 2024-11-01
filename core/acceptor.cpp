@@ -3,7 +3,7 @@
 //
 #include "acceptor.h"
 
-Acceptor::Acceptor(const std::unique_ptr<EventLoop> &loop, const std::string &ip, const uint16_t &port)
+Acceptor::Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port)
 : loop_(loop), server_socket_(create_nonblocking()), accept_channel_(loop_, server_socket_.fd())
 {
     InetAddress server_addr(ip, port);

@@ -15,12 +15,12 @@
 
 class Acceptor {
 private:
-    const std::unique_ptr<EventLoop> &loop_;
+    EventLoop *loop_;
     Socket server_socket_;
     Channel accept_channel_;
     std::function<void(std::unique_ptr<Socket>)> new_connection_callback_;
 public:
-    Acceptor(const std::unique_ptr<EventLoop> &loop, const std::string &ip, const uint16_t &port);
+    Acceptor(EventLoop *loop, const std::string &ip, const uint16_t &port);
     ~Acceptor();
 
     void new_connection();
