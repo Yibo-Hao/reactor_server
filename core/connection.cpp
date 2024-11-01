@@ -126,6 +126,7 @@ void Connection::send(const char* message, size_t len)
 
 void Connection::send_in_poll(const char* message, size_t len)
 {
+    std::cout << "send in thread: " << ::syscall(SYS_gettid) << std::endl;
     output_buffer_.append_with_head(message, len);
     client_channel_->enablewriting();
 }
